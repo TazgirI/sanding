@@ -20,6 +20,8 @@ import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
+import net.tazgirl.sanding.item.ModItems;
+
 // The value here should match an entry in the META-INF/neoforge.mods.toml file
 @Mod(Sanding.MODID)
 public class Sanding
@@ -47,13 +49,15 @@ public class Sanding
     public Sanding(IEventBus modEventBus, ModContainer modContainer)
     {
         // Register the commonSetup method for modloading
-        modEventBus.addListener(this::commonSetup);
+        modEventBus.addListener(this::addCreative);
 
         // Register the Deferred Register to the mod event bus so blocks get registered
         BLOCKS.register(modEventBus);
         // Register the Deferred Register to the mod event bus so items get registered
         ITEMS.register(modEventBus);
         // Register the Deferred Register to the mod event bus so tabs get registered
+
+        ModItems.register(modEventBus);
 
         // Register ourselves for server and other game events we are interested in.
         // Note that this is necessary if and only if we want *this* class (ExampleMod) to respond directly to events.
@@ -64,9 +68,12 @@ public class Sanding
         modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
     }
 
-    private void commonSetup(final FMLCommonSetupEvent event)
+    private void addCreative(BuildCreativeModeTabContentsEvent event)
     {
-
+        if(event.getTabKey() == CreativeModeTabs.TOOLS_AND_UTILITIES)
+        {
+            event.accept((ModItems.SANDPAPER));
+        }
     }
 
     // You can use SubscribeEvent and let the Event Bus discover methods to call

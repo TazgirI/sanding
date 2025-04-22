@@ -45,11 +45,6 @@ public class Config
     @SubscribeEvent
     static void onLoad(final ModConfigEvent event)
     {
-        if (sandpaperSources.size() != sandpaperResults.size())
-        {
-            throw new RuntimeException("Fatal error, SANDPAPER_SOURCE_ITEMS & SANDPAPER_RESULT_ITEMS are of different lengths");
-        }
-
         sandpaperSpeed = SANDPAPER_SPEED.get();
 
         // convert the list of strings into a set of items
@@ -60,5 +55,10 @@ public class Config
         sandpaperResults = SANDPAPER_RESULT_ITEMS.get().stream()
                 .map(itemName -> BuiltInRegistries.ITEM.get(ResourceLocation.parse(itemName)))
                 .collect(Collectors.toList());
+
+        if (sandpaperSources.size() != sandpaperResults.size())
+        {
+            throw new RuntimeException("Fatal error, SANDPAPER_SOURCE_ITEMS & SANDPAPER_RESULT_ITEMS are of different lengths");
+        }
     }
 }
