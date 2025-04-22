@@ -25,18 +25,12 @@ public class SandpaperItem extends Item
                     );
 
     @SubscribeEvent
-    static void onLoad(final ModConfigEvent event)
+    static void commonSetup (FMLCommonSetupEvent event)
     {
         for (int i = 0; i < Config.sandpaperSources.size(); i++)
         {
             RECIPE_MAP.put(Config.sandpaperSources.get(i), Config.sandpaperResults.get(i));
         }
-    }
-
-    @SubscribeEvent
-    static void commonSetup (FMLCommonSetupEvent event)
-    {
-
     }
 
     @Override
