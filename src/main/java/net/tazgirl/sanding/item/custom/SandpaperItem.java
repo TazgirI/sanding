@@ -1,22 +1,30 @@
 package net.tazgirl.sanding.item.custom;
 
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.UseAnim;
+import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.level.Level;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.event.config.ModConfigEvent;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.neoforged.neoforge.items.ItemHandlerHelper;
 import net.tazgirl.sanding.Config;
 import net.tazgirl.sanding.Sanding;
+import net.tazgirl.sanding.recipe.ModRecipes;
+import net.tazgirl.sanding.recipe.SandingRecipe;
+import net.tazgirl.sanding.recipe.SandingRecipeInput;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 @EventBusSubscriber(modid = Sanding.MODID, bus = EventBusSubscriber.Bus.MOD)
 public class SandpaperItem extends Item
@@ -26,94 +34,10 @@ public class SandpaperItem extends Item
         super(properties);
     }
 
-    private static final Map<Item, Item> RECIPE_MAP = new Map<Item, Item>()
-    {
-        @Override
-        public int size()
-        {
-            return 0;
-        }
-
-        @Override
-        public boolean isEmpty()
-        {
-            return false;
-        }
-
-        @Override
-        public boolean containsKey(Object key)
-        {
-            return false;
-        }
-
-        @Override
-        public boolean containsValue(Object value)
-        {
-            return false;
-        }
-
-        @Override
-        public Item get(Object key)
-        {
-            return null;
-        }
-
-        @Nullable
-        @Override
-        public Item put(Item key, Item value)
-        {
-            return null;
-        }
-
-        @Override
-        public Item remove(Object key)
-        {
-            return null;
-        }
-
-        @Override
-        public void putAll(@NotNull Map<? extends Item, ? extends Item> m)
-        {
-
-        }
-
-        @Override
-        public void clear()
-        {
-
-        }
-
-        @NotNull
-        @Override
-        public Set<Item> keySet()
-        {
-            return Set.of();
-        }
-
-        @NotNull
-        @Override
-        public Collection<Item> values()
-        {
-            return List.of();
-        }
-
-        @NotNull
-        @Override
-        public Set<Entry<Item, Item>> entrySet()
-        {
-            return Set.of();
-        }
-    };
-
     @SubscribeEvent
     static void commonSetup(FMLCommonSetupEvent event)
     {
-        System.out.println("commonSetup ran");
 
-        for (int i = 0; i < Config.sandpaperSources.size(); i++)
-        {
-            RECIPE_MAP.put(Config.sandpaperSources.get(i), Config.sandpaperResults.get(i));
-        }
     }
 
     @Override
@@ -126,6 +50,55 @@ public class SandpaperItem extends Item
     public int getUseDuration(ItemStack stack, LivingEntity entity)
     {
         return Config.sandpaperSpeed;
+    }
+
+    @Override
+    public InteractionResultHolder<ItemStack> use(Level world, Player player, InteractionHand hand)
+    {
+        InteractionResultHolder<ItemStack> irh = super.use(world, player, hand);
+        player.startUsingItem(hand);
+        return irh;
+    }
+
+    @Override
+    public ItemStack finishUsingItem(ItemStack stack, Level level, LivingEntity livingEntity)
+    {
+        ItemStack offHandItem = livingEntity.getItemInHand(InteractionHand.OFF_HAND);
+        ItemStack mainHandItem = livingEntity.getMainHandItem();
+
+
+
+        if (ValidRecipe(level, offHandItem))
+        {
+            mainHandItem.hurtAndBreak(1, (ServerLevel) level, null, item -> livingEntity.breakItem(InteractionHand.MAIN_HAND));
+        }
+
+
+
+        stack.setDamageValue(stack.getDamageValue() - 1);
+        return(stack);
+    }
+
+    private boolean ValidRecipe(Level level, ItemStack input)
+    {
+        Optional<RecipeHolder<SandingRecipe>> recipe = GetCurrentRecipe(level, input);
+
+        return recipe.isPresent();
+    }
+
+    private Optional<RecipeHolder<SandingRecipe>> GetCurrentRecipe(Level level, ItemStack input)
+    {
+        return level.getRecipeManager().getRecipeFor(ModRecipes.SANDING_TYPE.get(), new SandingRecipeInput(input), level);
+    }
+
+    public void BreakMainHand(LivingEntity livingEntity, Level level)
+    {
+        ItemStack stack = livingEntity.getMainHandItem();
+        if (!livingEntity.isSilent()) {
+            level.playLocalSound(livingEntity.getX(), livingEntity.getY(), livingEntity.getZ(), stack.getBreakingSound(), SoundSource.PLAYERS, 0.8F, 0.8F + this.level().random.nextFloat() * 0.4F, false);
+        }
+
+        this.spawnItemParticles(stack, 5);
     }
 
 }

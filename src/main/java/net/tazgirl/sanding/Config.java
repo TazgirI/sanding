@@ -20,22 +20,20 @@ public class Config
 
     private static final ModConfigSpec.IntValue SANDPAPER_SPEED = BUILDER
             .comment("Number of ticks sandpaper takes to use")
-            .defineInRange("sandpaperSpeed", 20, 1, Integer.MAX_VALUE);
+            .defineInRange("sandpaperSpeed", 30, 1, Integer.MAX_VALUE);
 
-    // a list of strings that are treated as resource locations for items
-    private static final ModConfigSpec.ConfigValue<List<? extends String>> SANDPAPER_SOURCE_ITEMS = BUILDER
-            .comment("The list of SOURCE items for sandpaper'ering \nNO DUPLICATES within this list, the order IS important" )
-            .defineListAllowEmpty("items", List.of("minecraft:magma_cream"), Config::validateItemName);
+    private static final ModConfigSpec.IntValue SANDPAPER_DURABILITY = BUILDER
+            .comment("Number of ticks sandpaper takes to use")
+            .defineInRange("sandpaperDurability", 20, 1, Integer.MAX_VALUE);
 
-    private static final ModConfigSpec.ConfigValue<List<? extends String>> SANDPAPER_RESULT_ITEMS = BUILDER
-            .comment("The list of RESULT items for sandpaper'ering \nNO DUPLICATES within this list, the order IS important")
-            .defineListAllowEmpty("items", List.of("minecraft:slime_ball"), Config::validateItemName);
+
+
 
     static final ModConfigSpec SPEC = BUILDER.build();
 
-    public  static int sandpaperSpeed;
-    public static List<Item> sandpaperSources;
-    public static List<Item> sandpaperResults;
+    public static int sandpaperSpeed;
+
+    public static int sandpaperDurability;
 
     private static boolean validateItemName(final Object obj)
     {
@@ -47,18 +45,7 @@ public class Config
     {
         sandpaperSpeed = SANDPAPER_SPEED.get();
 
-        // convert the list of strings into a set of items
-        sandpaperSources = SANDPAPER_SOURCE_ITEMS.get().stream()
-                .map(itemName -> BuiltInRegistries.ITEM.get(ResourceLocation.parse(itemName)))
-                .collect(Collectors.toList());
+        sandpaperDurability = SANDPAPER_DURABILITY.get();
 
-        sandpaperResults = SANDPAPER_RESULT_ITEMS.get().stream()
-                .map(itemName -> BuiltInRegistries.ITEM.get(ResourceLocation.parse(itemName)))
-                .collect(Collectors.toList());
-
-        if (sandpaperSources.size() != sandpaperResults.size())
-        {
-            throw new RuntimeException("Fatal error, SANDPAPER_SOURCE_ITEMS & SANDPAPER_RESULT_ITEMS are of different lengths");
-        }
     }
 }
