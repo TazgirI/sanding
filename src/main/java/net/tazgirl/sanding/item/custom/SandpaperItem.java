@@ -70,7 +70,7 @@ public class SandpaperItem extends Item
 
         if (ValidRecipe(level, offHandItem))
         {
-            mainHandItem.hurtAndBreak(1, (ServerLevel) level, null, item -> livingEntity.breakItem(InteractionHand.MAIN_HAND));
+            mainHandItem.hurtAndBreak(1, (ServerLevel) level, null, item -> BreakMainHand(livingEntity, level));
         }
 
 
@@ -79,9 +79,13 @@ public class SandpaperItem extends Item
         return(stack);
     }
 
+
+
     private boolean ValidRecipe(Level level, ItemStack input)
     {
         Optional<RecipeHolder<SandingRecipe>> recipe = GetCurrentRecipe(level, input);
+
+
 
         return recipe.isPresent();
     }
@@ -95,10 +99,11 @@ public class SandpaperItem extends Item
     {
         ItemStack stack = livingEntity.getMainHandItem();
         if (!livingEntity.isSilent()) {
-            level.playLocalSound(livingEntity.getX(), livingEntity.getY(), livingEntity.getZ(), stack.getBreakingSound(), SoundSource.PLAYERS, 0.8F, 0.8F + this.level().random.nextFloat() * 0.4F, false);
+            level.playLocalSound(livingEntity.getX(), livingEntity.getY(), livingEntity.getZ(), stack.getBreakingSound(), SoundSource.PLAYERS, 0.8F, 0.8F + level.random.nextFloat() * 0.4F, false);
         }
 
-        this.spawnItemParticles(stack, 5);
+        livingEntity.getMainHandItem().shrink(1);
+
     }
 
 }

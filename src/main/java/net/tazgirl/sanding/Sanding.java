@@ -1,5 +1,6 @@
 package net.tazgirl.sanding;
 
+import net.tazgirl.sanding.recipe.ModRecipes;
 import org.slf4j.Logger;
 
 import com.mojang.logging.LogUtils;
@@ -58,6 +59,7 @@ public class Sanding
         // Register the Deferred Register to the mod event bus so tabs get registered
 
         ModItems.register(modEventBus);
+        ModRecipes.register(modEventBus);
 
         // Register ourselves for server and other game events we are interested in.
         // Note that this is necessary if and only if we want *this* class (ExampleMod) to respond directly to events.
